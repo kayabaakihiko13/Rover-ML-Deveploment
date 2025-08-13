@@ -3,6 +3,8 @@ import onnxruntime as ort
 import yaml
 import matplotlib.pyplot as plt
 import cv2
+import time
+
 class YOLODetector:
     def __init__(self, model_path, class_yaml, conf_thresh=0.5, iou_thresh=0.45):
         self.conf_thresh = conf_thresh
@@ -59,8 +61,5 @@ class YOLODetector:
         img_tensor = self.preprocess(image)
         outputs = self.session.run(None, {self.session.get_inputs()[0].name: img_tensor})
         boxes,score,class_ids= self.postprocess(outputs,orig_h,orig_w)
-        unique,counter = np.unique(class_ids,return_counts=True)
-        class_names = [self.CLASSES[int(u)] for u in unique]
-        print(dict(zip(class_names,counter)))
         return boxes,score,class_ids
 
