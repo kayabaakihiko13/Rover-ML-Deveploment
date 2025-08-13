@@ -1,0 +1,18 @@
+# Konfigurasi Sederhana untuk Training Model
+imgsz: 640
+epochs: 50
+batch: 8
+lr0: 0.001
+optimizer: auto
+weight_decay: 0.001
+
+# Augmentasi Ringan
+hsv_h: 0.015
+hsv_s: 0.5
+hsv_v: 0.4
+fliplr: 0.5
+flipud: 0.1
+scale: 0.3
+translate: 0.05
+mixup: 0.1
+mosaic: 1.0
