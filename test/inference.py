@@ -4,7 +4,10 @@ import time
 import yaml
 import numpy as np
 import cv2
-from .utils import FileExistsNotFound, FormatFileError
+from ultralytics import YOLO 
+
+
+from .utils import FileExistsNotFound
 from src.parserV11 import YOLODetector
 
 class TestInference:
@@ -29,7 +32,7 @@ class TestInference:
         return class_ids, duration
 
 def main():
-    model_path = r'runs\detect\train2\weights\best.onnx'
+    model_path = r'runs\detect\train\weights\best.onnx'
     label_path = r'data\data.yaml'
     image_dir = r'data\test\images'
 
@@ -60,6 +63,7 @@ def main():
         print(f"\n=== Test {len(sample_images)} gambar ===")
         print(f"Total waktu   : {total_time:.4f} detik")
         print(f"Rata-rata/gambar: {avg_time:.4f} detik")
+
 
 if __name__ == "__main__":
     main()
