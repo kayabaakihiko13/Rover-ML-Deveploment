@@ -1,5 +1,6 @@
 import os
 from ultralytics import YOLO
+import shutil
 
 def train_model(model_path:str,data_path:str,config_label:str):
     if os.path.exists(model_path):
@@ -7,8 +8,8 @@ def train_model(model_path:str,data_path:str,config_label:str):
             raise ValueError('Format File Model harus .pt')
     else:
         raise ValueError("Tidak Ada File nya")
-    if os.path.exists('../runs'):
-        os.rmdir('../runs')
+    if os.path.exists('runs'):
+        shutil.rmtree('runs')
     
     model = YOLO(model_path)
     model.train(data=data_path,cfg=config_label)
