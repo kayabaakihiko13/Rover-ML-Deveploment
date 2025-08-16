@@ -1,13 +1,13 @@
 # Konfigurasi Sederhana untuk Training Model
 imgsz: 640
 epochs: 20
-batch: 16
-lr0: 0.0005
+batch: 8
+lr0: 0.001
 optimizer: auto
 weight_decay: 0.0005
 
-box: 10.0
-cls: 1.0
+box: 7.5
+cls: 0.85
 dfl: 1.0
 
 # Augmentasi Ringan
@@ -21,4 +21,4 @@ translate: 0.05
 mixup: 0.1
 mosaic: 1.0
 
-patience: 25
+patience: 10
