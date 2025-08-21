@@ -1,7 +1,4 @@
 from colorama import Fore ,Style
-
-
-
 class FileExistsNotFound(Exception):
     def __init__(self, msg: str):
         if not isinstance(msg, str):

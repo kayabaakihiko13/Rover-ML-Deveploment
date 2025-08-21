@@ -3,32 +3,35 @@ import onnxruntime as ort
 import yaml
 import matplotlib.pyplot as plt
 import cv2
-
+import multiprocessing
 from typing import Any,List
 
 class YOLODetector:
     def __init__(self, model_path:str, label_yaml:str,
-                 conf_thresh:float=0.25, iou_thresh:float=0.7):
+                 conf_thresh:float=0.25, iou_thresh:float=0.7,optimize:bool=True):
         """
         this class purpose to vanila parser with onnxruntime ecosystem
         model_path:str = path file model onnx file
         label_yaml:str = path file untuk yaml file
         conf_thresh:float = nilai minum untuk konfinde klasifikasi objek
         iou_thresh:float = nilai minum untuk konfiden deteksi objek
-
         source:
         https://docs.ultralytics.com/modes/predict/#inference-arguments
         """
         self.conf_thresh = conf_thresh
         self.iou_thresh = iou_thresh
-
         # Load classes from YAML
         with open(label_yaml, 'r') as f:
             self.CLASSES = yaml.safe_load(f)['names']
-        self.COLORS = np.random.uniform(0, 255, size=(len(self.CLASSES), 3))
-
+        opts = ort.SessionOptions()
         # Load model
-        self.session = ort.InferenceSession(model_path,providers=['CPUExecutionProvider'])
+        if optimize:
+            opts = ort.SessionOptions()
+            opts.intra_op_num_threads = 1
+            opts.add_session_config_entry("session.intra_op.allow_spinning", "0")
+            self.session = ort.InferenceSession(model_path,opts,providers=['CPUExecutionProvider'])
+        else:
+            self.session = ort.InferenceSession(model_path,opts,providers=['CPUExecutionProvider'])
         input_shape = self.session.get_inputs()[0].shape
         self.INPUT_H = input_shape[2]
         self.INPUT_W = input_shape[3]
@@ -67,6 +70,7 @@ class YOLODetector:
                 final_scores.append(confidences[i])
                 final_class_ids.append(class_ids[i])
         return final_boxes, final_scores, final_class_ids
+
 
     def detect(self, image:np.ndarray)->List:
         orig_h, orig_w = image.shape[:2]
