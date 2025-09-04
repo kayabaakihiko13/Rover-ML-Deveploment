@@ -61,33 +61,40 @@ class TestInference:
             ])
 
     def _run_inference(self, detector, image_path: str, mode: str, warmup: int = 3):
-        """Jalankan inference + monitor resource"""
         image = cv2.imread(image_path)
         if image is None:
             raise FileNotFoundError(f"Gambar tidak ditemukan: {image_path}")
 
-        # warmup run (biar inference lebih stabil)
+        # warmup
         for _ in range(warmup):
             detector.detect(image)
 
         process = psutil.Process(os.getpid())
         mem_before = process.memory_info().rss / (1024 * 1024)  # MB
 
-        process.cpu_percent()  # reset counter
+        # CPU time sebelum inference
+        cpu_before = process.cpu_times()
         start = time.perf_counter()
-        _, _, _ = detector.detect(image)
+        _ = detector.detect(image)
         end = time.perf_counter()
+        cpu_after = process.cpu_times()
 
         latency_ms = (end - start) * 1000
-        cpu_usage = process.cpu_percent()
+        elapsed = end - start
+        user_time = cpu_after.user - cpu_before.user
+        system_time = cpu_after.system - cpu_before.system
+        cpu_usage = 100 * (user_time + system_time) / elapsed / psutil.cpu_count()
+
         mem_after = process.memory_info().rss / (1024 * 1024)
+        mem_usage = mem_after  
 
-        mem_usage = mem_after - mem_before
-
-        print(f"[{mode}] Latency: {latency_ms:.2f} ms | CPU: {cpu_usage:.2f}% | Mem Change: {mem_usage:.2f} MB")
+        print(f"[{mode}] Latency: {latency_ms:.2f} ms | CPU: {cpu_usage:.2f}% | Mem: {mem_usage:.2f} MB")
         self._record_result(image_path, mode, 1, latency_ms, cpu_usage, mem_usage)
 
         return latency_ms, cpu_usage, mem_usage
+
+        
+
 
     def test_with_optimize(self, image_path: str):
         return self._run_inference(self.yolov11_onnx_optimize, image_path, "optimized")
